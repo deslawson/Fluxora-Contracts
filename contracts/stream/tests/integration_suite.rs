@@ -22,6 +22,63 @@ struct TestContext<'a> {
     token: TokenClient<'a>,
 }
 
+#[test]
+fn verify_error_doc_coverage() {
+    use std::fs;
+    let manifest_dir = std::env::var("CARGO_MANIFEST_DIR").unwrap_or_else(|_| ".".into());
+    let path = std::path::Path::new(&manifest_dir).join("../../docs/error.md");
+    let error_md = fs::read_to_string(path).expect("Could not read docs/error.md");
+
+    // Check ContractError variants
+    let variants = [
+        "StreamNotFound",
+        "InvalidState",
+        "InvalidParams",
+        "ContractPaused",
+        "StartTimeInPast",
+        "ArithmeticOverflow",
+        "Unauthorized",
+        "AlreadyInitialised",
+        "InsufficientBalance",
+        "InsufficientDeposit",
+        "StreamAlreadyPaused",
+        "StreamNotPaused",
+        "StreamTerminalState",
+        "DuplicateStreamId",
+        "TemplateNotFound",
+        "TemplateLimitExceeded",
+        "TemplateUnauthorized",
+        "SignatureDeadlineExpired",
+        "InvalidSignature",
+    ];
+
+    for variant in variants {
+        assert!(
+            error_md.contains(variant),
+            "ContractError variant {} missing from docs/error.md",
+            variant
+        );
+    }
+
+    // Check FactoryError variants
+    let factory_variants = [
+        "AlreadyInitialized",
+        "NotInitialized",
+        "Unauthorized",
+        "RecipientNotAllowlisted",
+        "DepositExceedsCap",
+        "DurationTooShort",
+    ];
+
+    for variant in factory_variants {
+        assert!(
+            error_md.contains(variant),
+            "FactoryError variant {} missing from docs/error.md",
+            variant
+        );
+    }
+}
+
 impl<'a> TestContext<'a> {
     fn setup() -> Self {
         let env = Env::default();
